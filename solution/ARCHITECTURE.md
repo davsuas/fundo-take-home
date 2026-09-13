@@ -1,5 +1,8 @@
 # Architecture
 
+Interactive diagrams (open the HTML in a browser; each `.archify.json` is its source):
+[architecture](../docs/architecture/architecture.html) · [submit + outbox sequence](../docs/sequence/sequence.html).
+
 ## Structure and layers
 
 ### Runtime: containers and the request/event flow
