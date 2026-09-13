@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>Fundo.Loans.Domain</AssemblyName>
+    <RootNamespace>Fundo.Loans.Domain</RootNamespace>
+  </PropertyGroup>
+
+</Project>

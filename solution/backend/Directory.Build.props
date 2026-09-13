@@ -1,0 +1,23 @@
+<Project>
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsAsErrors />
+    <LangVersion>latest</LangVersion>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <!-- CA1515: types can be internal - not enforced for a take-home; xUnit1051: TestContext
+         cancellation propagation is a nice-to-have, not worth the noise on every HTTP/DB call
+         in integration tests. -->
+    <NoWarn>CA1515;xUnit1051</NoWarn>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <!-- xUnit v3 runs on Microsoft.Testing.Platform; this bridges `dotnet test` to it (.NET 10 SDK
+       dropped the legacy VSTest bridge for MTP-based test projects). -->
+  <PropertyGroup Condition="'$(IsTestProject)' == 'true'">
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,17 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Fundo.Loans.Domain/Fundo.Loans.Domain.csproj" />
+    <Project Path="src/Fundo.Loans.Application/Fundo.Loans.Application.csproj" />
+    <Project Path="src/Fundo.Loans.Infrastructure/Fundo.Loans.Infrastructure.csproj" />
+    <Project Path="src/Fundo.Loans.Api/Fundo.Loans.Api.csproj" />
+    <Project Path="src/Fundo.Loans.Worker/Fundo.Loans.Worker.csproj" />
+  </Folder>
+  <Folder Name="/tests/" />
+  <Folder Name="/tests/unit/">
+    <Project Path="tests/unit/Fundo.Loans.Domain.UnitTests/Fundo.Loans.Domain.UnitTests.csproj" />
+    <Project Path="tests/unit/Fundo.Loans.Application.UnitTests/Fundo.Loans.Application.UnitTests.csproj" />
+  </Folder>
+  <Folder Name="/tests/integration/">
+    <Project Path="tests/integration/Fundo.Loans.IntegrationTests/Fundo.Loans.IntegrationTests.csproj" />
+  </Folder>
+</Solution>

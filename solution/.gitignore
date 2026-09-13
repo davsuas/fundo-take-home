@@ -1,0 +1,12 @@
+.env
+
+# .NET
+backend/**/bin/
+backend/**/obj/
+
+# Node
+**/node_modules/
+frontend/.next/
+frontend/tsconfig.tsbuildinfo
+
+.DS_Store

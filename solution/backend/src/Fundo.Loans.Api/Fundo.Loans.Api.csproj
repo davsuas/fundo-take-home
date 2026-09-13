@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <AssemblyName>Fundo.Loans.Api</AssemblyName>
+    <RootNamespace>Fundo.Loans.Api</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Serilog.AspNetCore" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Fundo.Loans.Application\Fundo.Loans.Application.csproj" />
+    <ProjectReference Include="..\Fundo.Loans.Infrastructure\Fundo.Loans.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>
