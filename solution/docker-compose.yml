@@ -1,0 +1,102 @@
+name: fundo-loans-solution
+
+networks:
+  edge:
+  internal:
+    internal: true
+
+volumes:
+  postgres-data:
+
+x-hardened: &hardened
+  read_only: true
+  tmpfs: ["/tmp"]
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_SUPERUSER_PASSWORD}
+      POSTGRES_MIGRATOR_USER: ${POSTGRES_MIGRATOR_USER}
+      POSTGRES_MIGRATOR_PASSWORD: ${POSTGRES_MIGRATOR_PASSWORD}
+      POSTGRES_APP_USER: ${POSTGRES_APP_USER}
+      POSTGRES_APP_PASSWORD: ${POSTGRES_APP_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    networks: [internal]
+    # No published port. Not read_only/cap_drop: the upstream entrypoint needs to chown its data dir.
+    security_opt: [no-new-privileges:true]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # One-shot: applies EF Core migrations + seeds the blacklist with the schema-owner role, then exits.
+  migrate:
+    build:
+      context: ./backend
+      dockerfile: src/Fundo.Loans.Api/Dockerfile
+    command: ["migrate"]
+    environment:
+      ConnectionStrings__Loans: "Host=postgres;Database=${POSTGRES_DB};Username=${POSTGRES_MIGRATOR_USER};Password=${POSTGRES_MIGRATOR_PASSWORD}"
+      SsnHashing__Pepper: ${SSN_HASH_PEPPER}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks: [internal]
+    <<: *hardened
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: src/Fundo.Loans.Api/Dockerfile
+    environment:
+      ConnectionStrings__Loans: "Host=postgres;Database=${POSTGRES_DB};Username=${POSTGRES_APP_USER};Password=${POSTGRES_APP_PASSWORD}"
+      SsnHashing__Pepper: ${SSN_HASH_PEPPER}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    # Published only so a reviewer can curl the API; the browser never calls it (see README).
+    # A port can only be published from a non-internal network, hence `edge`.
+    ports: ["${API_PORT:-5130}:8080"]
+    networks: [edge, internal]
+    <<: *hardened
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: src/Fundo.Loans.Worker/Dockerfile
+    environment:
+      ConnectionStrings__Loans: "Host=postgres;Database=${POSTGRES_DB};Username=${POSTGRES_APP_USER};Password=${POSTGRES_APP_PASSWORD}"
+      SsnHashing__Pepper: ${SSN_HASH_PEPPER}
+      ExternalService__BaseUrl: "http://external-service:4000/"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      external-service:
+        condition: service_healthy
+    networks: [internal]
+    <<: *hardened
+
+  external-service:
+    build: ./external-service
+    ports: ["${EXTERNAL_SERVICE_PORT:-5230}:4000"]
+    networks: [edge, internal]
+    <<: *hardened
+
+  frontend:
+    build: ./frontend
+    environment:
+      API_BASE_URL: "http://api:8080"
+    ports: ["${FRONTEND_PORT:-5330}:3000"]
+    depends_on:
+      api:
+        condition: service_healthy
+    networks: [edge, internal]
+    <<: *hardened
