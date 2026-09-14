@@ -1,6 +1,8 @@
 # Fundo LLC — Take-Home: Loan Application Flow
 
-> 🎥 **Demo video:** _<paste public Loom/Jam link here>_
+> 🎥 **Demo video:** [Fundo - Take-home Test Walkthrough](https://app.weet.co/play/e8c1b49d/fundo-take-home-test-walkthrough)
+
+> 🎥 **Diagrams video:** [Fundo - Take-home Test Diagrams](https://app.weet.co/play/0e765e8b/fundo-take-home-test-diagrams)
 
 **The submission is [`solution/`](solution/).** Start with its [README](solution/README.md) (run, test data,
 tests) and [ARCHITECTURE](solution/ARCHITECTURE.md) (design decisions and trade-offs).
