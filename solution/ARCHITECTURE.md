@@ -1,5 +1,10 @@
 # Architecture
 
+Interactive diagrams (open the HTML in a browser; each `.archify.json` is its source):
+[architecture](../docs/architecture/architecture.html) · [submit + outbox sequence](../docs/sequence/sequence.html).
+
+> 🎥 **Diagrams video:** [Fundo - Take-home Test Diagrams](https://app.weet.co/play/0e765e8b/fundo-take-home-test-diagrams)
+
 ## Structure and layers
 
 ### Runtime: containers and the request/event flow

@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import {
   US_STATES,
+  formatSsn,
   loanApplicationSchema,
   type LoanApplicationInput,
   type LoanApplicationValues,
@@ -29,6 +30,7 @@ export function LoanApplicationForm() {
     resolver: zodResolver(loanApplicationSchema),
     mode: "onBlur",
   });
+  const ssnField = register("ssn");
 
   // With JavaScript, react-hook-form validates first and only a valid form dispatches the Server
   // Action (which validates again on the server). Without JavaScript, `action` still posts the
@@ -79,10 +81,16 @@ export function LoanApplicationForm() {
             <Input
               id="ssn"
               inputMode="numeric"
+              autoComplete="off"
               placeholder="XXX-XX-XXXX"
+              maxLength={11}
               invalid={Boolean(errorFor("ssn"))}
               aria-describedby={errorFor("ssn") ? "ssn-error" : undefined}
-              {...register("ssn")}
+              {...ssnField}
+              onChange={(event) => {
+                event.target.value = formatSsn(event.target.value);
+                return ssnField.onChange(event);
+              }}
             />
           </Field>
         </div>

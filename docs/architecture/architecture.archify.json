@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Fundo Loans Architecture",
+    "output": "architecture.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    { "id": "browser", "type": "external", "label": "Browser", "sublabel": "loan applicant", "pos": [40, 260], "size": [140, 64] },
+    { "id": "frontend", "type": "frontend", "label": "Next.js frontend", "sublabel": "Server Action :5330", "pos": [320, 260], "size": [170, 64], "tag": "nonce CSP" },
+    { "id": "api", "type": "backend", "label": "Loans API", "sublabel": "ASP.NET Core :5130", "pos": [740, 260], "size": [170, 64], "tag": "RuleEngine" },
+    { "id": "postgres", "type": "database", "label": "PostgreSQL 18", "sublabel": "customers · outbox", "pos": [1100, 260], "size": [170, 64] },
+    { "id": "migrate", "type": "backend", "label": "migrate", "sublabel": "one-shot EF Core", "pos": [1100, 40], "size": [170, 64] },
+    { "id": "worker", "type": "backend", "label": "Worker", "sublabel": "OutboxDispatcher", "pos": [1100, 460], "size": [170, 64] },
+    { "id": "external", "type": "external", "label": "External service", "sublabel": "Node mock :5230", "pos": [740, 460], "size": [170, 64] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "docker compose: fundo-loans-solution", "wraps": ["frontend", "api", "postgres", "migrate", "worker", "external"] },
+    { "kind": "security-group", "label": "internal network only", "wraps": ["postgres", "migrate", "worker"] }
+  ],
+  "connections": [
+    { "id": "form-post", "from": "browser", "to": "frontend", "label": "form submit", "variant": "emphasis" },
+    { "id": "submit", "from": "frontend", "to": "api", "label": "POST /api/v1/loan-applications", "variant": "emphasis" },
+    { "id": "persist", "from": "api", "to": "postgres", "label": "1 tx + outbox", "variant": "emphasis" },
+    { "id": "schema", "from": "migrate", "to": "postgres", "label": "migrations", "variant": "dashed", "labelDy": 50, "fromSide": "bottom", "toSide": "top" },
+    { "id": "claim", "from": "worker", "to": "postgres", "label": "claim SKIP LOCKED", "fromSide": "top", "toSide": "bottom" },
+    { "id": "deliver", "from": "worker", "to": "external", "label": "PUT /customers/{id}", "variant": "emphasis" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "Request path", "items": ["Browser never calls the API; only the Server Action does", "RuleEngine decides; first deny rule wins", "Approved: customer + application + outbox row in one transaction"] },
+    { "dot": "emerald", "title": "Async delivery", "items": ["Worker claims due outbox rows with FOR UPDATE SKIP LOCKED", "PUT with Idempotency-Key; retries with backoff, then dead-letter", "Receiver ignores events older than occurredAtUtc"] },
+    { "dot": "rose", "title": "Security", "items": ["SSN stored as HMAC hash + last 4", "api/worker use a least-privilege DB role; migrate owns schema", "Postgres, worker, migrate on the internal network only"] }
+  ]
+}

@@ -1,6 +1,6 @@
 # Fundo Loans — loan application flow
 
-> 🎥 **Demo video:** _<paste public Loom/Jam link here>_
+> 🎥 **Demo video:** [Fundo - Take-home Test Walkthrough](https://app.weet.co/play/e8c1b49d/fundo-take-home-test-walkthrough)
 
 A Next.js form sends an application to a .NET API. A rule engine approves or denies it. Approved
 applications are saved in PostgreSQL in one transaction together with an outbox event. A separate

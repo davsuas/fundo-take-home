@@ -23,9 +23,17 @@ export const loanApplicationSchema = z.object({
   ssn: z
     .string()
     .trim()
-    .transform((value) => value.replace(/\D/g, ""))
-    .refine((digits) => digits.length === 9, "SSN must be 9 digits"),
+    .regex(/^\d{3}-?\d{2}-?\d{4}$/, "SSN must be 9 digits")
+    .transform((value) => value.replace(/-/g, "")),
 });
+
+/** Input mask for the SSN field: keeps at most 9 digits and formats them as `XXX-XX-XXXX` while typing. */
+export function formatSsn(value: string): string {
+  const digits = value.replace(/\D/g, "").slice(0, 9);
+  if (digits.length > 5) return `${digits.slice(0, 3)}-${digits.slice(3, 5)}-${digits.slice(5)}`;
+  if (digits.length > 3) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  return digits;
+}
 
 export type LoanApplicationInput = z.input<typeof loanApplicationSchema>;
 export type LoanApplicationValues = z.output<typeof loanApplicationSchema>;

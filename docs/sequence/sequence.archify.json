@@ -1,0 +1,191 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Loan Submission Sequence",
+    "output": "sequence.html",
+    "viewBox": [
+      1080,
+      630
+    ],
+    "column_fit": "spread",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "browser",
+      "type": "external",
+      "label": "Browser",
+      "sublabel": "applicant"
+    },
+    {
+      "id": "action",
+      "type": "frontend",
+      "label": "Server Action",
+      "sublabel": "Next.js"
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "Loans API",
+      "sublabel": "SubmitHandler"
+    },
+    {
+      "id": "rules",
+      "type": "backend",
+      "label": "RuleEngine",
+      "sublabel": "deny rules"
+    },
+    {
+      "id": "db",
+      "type": "database",
+      "label": "PostgreSQL",
+      "sublabel": "tx + outbox"
+    },
+    {
+      "id": "worker",
+      "type": "backend",
+      "label": "Worker",
+      "sublabel": "OutboxDispatcher"
+    },
+    {
+      "id": "external",
+      "type": "external",
+      "label": "External API",
+      "sublabel": "Node mock"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 428,
+      "label": "Submit (request path)"
+    },
+    {
+      "from": 440,
+      "to": 540,
+      "label": "Deliver (worker, async)"
+    }
+  ],
+  "messages": [
+    {
+      "from": "browser",
+      "to": "action",
+      "y": 176,
+      "label": "submit form",
+      "variant": "emphasis"
+    },
+    {
+      "from": "action",
+      "to": "api",
+      "y": 210,
+      "label": "POST /api/v1/loan-applications",
+      "variant": "emphasis",
+      "note": "Zod re-parses FormData first"
+    },
+    {
+      "from": "api",
+      "to": "rules",
+      "y": 244,
+      "label": "DecideAsync",
+      "variant": "default"
+    },
+    {
+      "from": "rules",
+      "to": "api",
+      "y": 278,
+      "label": "Approve / Deny",
+      "variant": "return",
+      "note": "Deny persists nothing"
+    },
+    {
+      "from": "api",
+      "to": "db",
+      "y": 312,
+      "label": "1 tx: customer + app + outbox",
+      "variant": "emphasis"
+    },
+    {
+      "from": "db",
+      "to": "api",
+      "y": 346,
+      "label": "COMMIT",
+      "variant": "return",
+      "note": "23505 race: retry once"
+    },
+    {
+      "from": "api",
+      "to": "action",
+      "y": 380,
+      "label": "200 outcome + ids",
+      "variant": "return"
+    },
+    {
+      "from": "action",
+      "to": "browser",
+      "y": 414,
+      "label": "redirect /result",
+      "variant": "return"
+    },
+    {
+      "from": "worker",
+      "to": "db",
+      "y": 462,
+      "label": "claim SKIP LOCKED",
+      "variant": "default",
+      "note": "UPDATE … RETURNING due rows; lease via next_attempt_at"
+    },
+    {
+      "from": "worker",
+      "to": "external",
+      "y": 494,
+      "label": "PUT /customers/{id}",
+      "variant": "emphasis",
+      "note": "Idempotency-Key; 200 created / updated / ignored_stale"
+    },
+    {
+      "from": "worker",
+      "to": "db",
+      "y": 526,
+      "label": "processed or backoff",
+      "variant": "dashed"
+    }
+  ],
+  "activations": [
+    {
+      "participant": "action",
+      "from": 170,
+      "to": 422
+    },
+    {
+      "participant": "api",
+      "from": 204,
+      "to": 388
+    },
+    {
+      "participant": "rules",
+      "from": 238,
+      "to": 286
+    },
+    {
+      "participant": "db",
+      "from": 306,
+      "to": 354
+    },
+    {
+      "participant": "worker",
+      "from": 456,
+      "to": 534
+    },
+    {
+      "participant": "db",
+      "from": 456,
+      "to": 470
+    },
+    {
+      "participant": "external",
+      "from": 488,
+      "to": 502
+    }
+  ]
+}

@@ -32,6 +32,16 @@ describe("LoanApplicationForm", () => {
     expect(await screen.findByText("SSN must be 9 digits")).toBeInTheDocument();
   });
 
+  it("masks the SSN as XXX-XX-XXXX, ignoring non-digits and anything past 9 digits", async () => {
+    const user = userEvent.setup();
+    render(<LoanApplicationForm />);
+    const ssn = screen.getByLabelText("SSN");
+
+    await user.type(ssn, "55a5 55-5555999");
+
+    expect(ssn).toHaveValue("555-55-5555");
+  });
+
   it("dispatches the server action with the form data once every field is valid", async () => {
     const user = userEvent.setup();
     render(<LoanApplicationForm />);
